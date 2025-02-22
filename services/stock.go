@@ -26,3 +26,13 @@ func AddStock() repository.Stock {
 	}
 	return stock
 }
+
+func GetStockList() []repository.Stock {
+	ctx := context.Background()
+	stockList, err := Queries.GetStocks(ctx)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+	return stockList
+}

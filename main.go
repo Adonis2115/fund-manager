@@ -13,6 +13,6 @@ func init() {
 
 func main() {
 	// stockls := services.AddStock()
-	stockls := services.GetStock()
+	stockls := services.GetStockList()
 	log.Println(stockls)
 }
