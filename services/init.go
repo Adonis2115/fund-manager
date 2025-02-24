@@ -1,29 +1,29 @@
 package services
 
 import (
-	"database/sql"
+	"context"
 	"fund-manager/internal/repository"
 	"log"
 	"os"
 
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/joho/godotenv"
-	_ "github.com/lib/pq"
 )
 
-var DB *sql.DB
+var Pool *pgxpool.Pool
 var Queries *repository.Queries
 
 func ConnectToDb() {
 	LoadEnv()
 	connStr := os.Getenv("POSTGRES")
-	db, err := sql.Open("postgres", connStr)
+	pool, err := pgxpool.New(context.Background(), connStr)
 
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	DB = db
-	Queries = repository.New(DB)
+	Pool = pool
+	Queries = repository.New(Pool)
 }
 
 func LoadEnv() {

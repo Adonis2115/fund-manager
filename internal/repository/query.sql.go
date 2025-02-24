@@ -7,7 +7,20 @@ package repository
 
 import (
 	"context"
+
+	"github.com/jackc/pgx/v5/pgtype"
 )
+
+type BulkCreateStocksParams struct {
+	ID           pgtype.UUID
+	Name         string
+	Symbol       string
+	Customsymbol string
+	Scripttype   string
+	Industry     pgtype.Text
+	Isin         pgtype.Text
+	Fno          bool
+}
 
 const createStock = `-- name: CreateStock :one
 INSERT INTO stocks (
@@ -19,18 +32,18 @@ RETURNING id, created_at, updated_at, name, symbol, customsymbol, scripttype, in
 `
 
 type CreateStockParams struct {
-	ID           int64
+	ID           pgtype.UUID
 	Name         string
 	Symbol       string
 	Customsymbol string
 	Scripttype   string
-	Industry     string
-	Isin         string
+	Industry     pgtype.Text
+	Isin         pgtype.Text
 	Fno          bool
 }
 
 func (q *Queries) CreateStock(ctx context.Context, arg CreateStockParams) (Stock, error) {
-	row := q.db.QueryRowContext(ctx, createStock,
+	row := q.db.QueryRow(ctx, createStock,
 		arg.ID,
 		arg.Name,
 		arg.Symbol,
@@ -61,8 +74,8 @@ SELECT id, created_at, updated_at, name, symbol, customsymbol, scripttype, indus
 WHERE id = $1 LIMIT 1
 `
 
-func (q *Queries) GetStock(ctx context.Context, id int64) (Stock, error) {
-	row := q.db.QueryRowContext(ctx, getStock, id)
+func (q *Queries) GetStock(ctx context.Context, id pgtype.UUID) (Stock, error) {
+	row := q.db.QueryRow(ctx, getStock, id)
 	var i Stock
 	err := row.Scan(
 		&i.ID,
@@ -85,7 +98,7 @@ ORDER BY name
 `
 
 func (q *Queries) GetStocks(ctx context.Context) ([]Stock, error) {
-	rows, err := q.db.QueryContext(ctx, getStocks)
+	rows, err := q.db.Query(ctx, getStocks)
 	if err != nil {
 		return nil, err
 	}
@@ -108,9 +121,6 @@ func (q *Queries) GetStocks(ctx context.Context) ([]Stock, error) {
 			return nil, err
 		}
 		items = append(items, i)
-	}
-	if err := rows.Close(); err != nil {
-		return nil, err
 	}
 	if err := rows.Err(); err != nil {
 		return nil, err

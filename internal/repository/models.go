@@ -5,18 +5,18 @@
 package repository
 
 import (
-	"database/sql"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 type Stock struct {
-	ID           int64
-	CreatedAt    sql.NullTime
-	UpdatedAt    sql.NullTime
+	ID           pgtype.UUID
+	CreatedAt    pgtype.Timestamptz
+	UpdatedAt    pgtype.Timestamptz
 	Name         string
 	Symbol       string
 	Customsymbol string
 	Scripttype   string
-	Industry     string
-	Isin         string
+	Industry     pgtype.Text
+	Isin         pgtype.Text
 	Fno          bool
 }

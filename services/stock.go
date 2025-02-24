@@ -5,19 +5,20 @@ import (
 	"fund-manager/internal/repository"
 	"log"
 
-	_ "github.com/lib/pq"
+	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 func AddStock() repository.Stock {
 	ctx := context.Background()
 	stock, err := Queries.CreateStock(ctx, repository.CreateStockParams{
-		ID:           2,
+		ID:           pgtype.UUID{Bytes: uuid.New(), Valid: true},
 		Name:         "Alpha",
 		Symbol:       "ALPH",
 		Customsymbol: "NSE:ALPH",
 		Scripttype:   "LARGE",
-		Industry:     "test",
-		Isin:         "13214334",
+		Industry:     pgtype.Text{String: "test", Valid: true},
+		Isin:         pgtype.Text{String: "13214334", Valid: true},
 		Fno:          false,
 	})
 
