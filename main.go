@@ -1,18 +1,16 @@
 package main
 
 import (
-	"fund-manager/services"
-
-	_ "github.com/lib/pq"
+	initializers "fund-manager/utils"
 )
 
 func init() {
-	services.ConnectToDb()
+	initializers.ConnectToDb()
 }
 
 func main() {
 	// stockls := services.AddStock()
-	services.CsvStocks()
+	initializers.SaveStocksToDb()
 	// stockls := services.GetStockList()
 	// log.Println(stockls)
 }

@@ -1,4 +1,4 @@
-package services
+package initializers
 
 import (
 	"context"
@@ -13,7 +13,7 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-func CsvStocks() {
+func SaveStocksToDb() {
 	ctx := context.Background()
 	index := repository.CreateStockParams{ID: pgtype.UUID{Bytes: uuid.New(), Valid: true}, Name: "Nifty 50", Symbol: "NIFTY", Customsymbol: "^NSEI", Scripttype: "index", Fno: true}
 	Queries.CreateStock(ctx, index)

@@ -1,4 +1,4 @@
-package services
+package initializers
 
 import (
 	"context"
