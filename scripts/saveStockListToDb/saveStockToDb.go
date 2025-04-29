@@ -1,22 +1,34 @@
-package initializers
+package main
 
 import (
 	"context"
 	"encoding/csv"
 	"fmt"
 	"fund-manager/internal/repository"
+	initializers "fund-manager/utils"
 	"log"
 	"os"
 	"strings"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-func SaveStocksToDb() {
+func init() {
+	initializers.LoadEnv()
+}
+
+func main() {
 	ctx := context.Background()
-	index := repository.CreateStockParams{ID: pgtype.UUID{Bytes: uuid.New(), Valid: true}, Name: "Nifty 50", Symbol: "NIFTY", Customsymbol: "^NSEI", Scripttype: "index", Fno: true}
-	Queries.CreateStock(ctx, index)
+	connStr := os.Getenv("POSTGRES")
+	conn, err := pgx.Connect(ctx, connStr)
+	if err != nil {
+		log.Fatal("Cannot connect to database:", err)
+	}
+	defer conn.Close(ctx)
+	queries := repository.New(conn)
+
 	folder := "data/stocks"
 	files, err := os.ReadDir(folder)
 	if err != nil {
@@ -54,19 +66,21 @@ func SaveStocksToDb() {
 						break
 					}
 				}
-				stock := repository.BulkCreateStocksParams{
-					ID:           pgtype.UUID{Bytes: uuid.New(), Valid: true},
-					Name:         record[0],
-					Symbol:       record[2],
-					Customsymbol: record[2] + ".NS",
-					Scripttype:   stockType,
-					Industry:     pgtype.Text{String: record[1], Valid: true},
-					Isin:         pgtype.Text{String: record[4], Valid: true},
-					Fno:          isFno,
+				if strings.HasPrefix(record[4], "INE") {
+					stock := repository.BulkCreateStocksParams{
+						ID:           pgtype.UUID{Bytes: uuid.New(), Valid: true},
+						Name:         record[0],
+						Symbol:       record[2],
+						Customsymbol: record[2] + ".NS",
+						Scripttype:   stockType,
+						Industry:     pgtype.Text{String: record[1], Valid: true},
+						Isin:         pgtype.Text{String: record[4], Valid: true},
+						Fno:          isFno,
+					}
+					stocks = append(stocks, stock)
 				}
-				stocks = append(stocks, stock)
 			}
-			result, err := Queries.BulkCreateStocks(ctx, stocks[1:]) // remove 1st record
+			result, err := queries.BulkCreateStocks(ctx, stocks)
 			if err != nil {
 				log.Fatal(err)
 			}

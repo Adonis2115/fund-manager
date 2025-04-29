@@ -10,7 +10,6 @@ func init() {
 
 func main() {
 	// stockls := services.AddStock()
-	initializers.SaveStocksToDb()
 	// stockls := services.GetStockList()
 	// log.Println(stockls)
 }

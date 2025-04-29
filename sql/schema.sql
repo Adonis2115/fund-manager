@@ -11,3 +11,23 @@ CREATE TABLE
         isin VARCHAR(50),
         fno boolean NOT NULL
     );
+
+CREATE TABLE
+    daily (
+        id uuid PRIMARY KEY,
+        created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+        stockId uuid NOT NULL,
+        open DECIMAL,
+        high DECIMAL,
+        low DECIMAL,
+        close DECIMAL,
+        adjClose DECIMAL,
+        volume INTEGER,
+        timestamp timestamp
+    );
+
+-- Establish the one-to-many relationship between stocks and daily
+ALTER TABLE daily
+ADD CONSTRAINT fk_daily_stockid
+FOREIGN KEY (stockId) REFERENCES stocks(id);

@@ -20,3 +20,10 @@ INSERT INTO stocks (
 ) VALUES (
     $1, $2, $3, $4, $5, $6, $7, $8
 );
+
+-- name: BulkCreateDaily :copyfrom
+INSERT INTO daily (
+    id, stockId, open, high, low, close, adjClose, volume, timestamp
+) VALUES (
+    $1, $2, $3, $4, $5, $6, $7, $8, $9
+);

@@ -1,4 +1,4 @@
-package initializers
+package main
 
 import (
 	"fmt"
@@ -12,7 +12,7 @@ type StockList struct {
 	url string
 }
 
-func DownloadStocksCsv() {
+func main() {
 	stockList := []StockList{{cap: "large", url: "https://nsearchives.nseindia.com/content/indices/ind_nifty100list.csv"},
 		{cap: "mid", url: "https://nsearchives.nseindia.com/content/indices/ind_niftymidcap150list.csv"},
 		{cap: "small", url: "https://nsearchives.nseindia.com/content/indices/ind_niftysmallcap250list.csv"},
