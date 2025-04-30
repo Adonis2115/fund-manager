@@ -1,3 +1,4 @@
+// 📁 internal/backtest/backtest.go
 package backtest
 
 import (
@@ -13,6 +14,7 @@ import (
 
 type BacktestConfig struct {
 	StartDate      time.Time
+	EndDate        time.Time
 	Months         int
 	TopN           int32
 	ScriptType     string
@@ -36,8 +38,11 @@ func RunBacktest(ctx context.Context, cfg BacktestConfig) BacktestResult {
 
 	var previousPrices map[string]float64 = make(map[string]float64)
 
-	for month := 0; month < cfg.Months; month++ {
+	for month := 0; ; month++ {
 		monthDate := cfg.StartDate.AddDate(0, month, 0)
+		if monthDate.After(cfg.EndDate) {
+			break
+		}
 		params := repository.GetTopStocksByReturnParams{
 			Column1: toPgTimestamp(monthDate),
 			Column2: 12,
@@ -84,7 +89,8 @@ func RunBacktest(ctx context.Context, cfg BacktestConfig) BacktestResult {
 	}
 
 	dd := maxDrawdown(equityCurve)
-	cagr := computeCAGR(cfg.InitialCapital, equity, cfg.Months)
+	months := int(cfg.EndDate.Sub(cfg.StartDate).Hours() / (24 * 30))
+	cagr := computeCAGR(cfg.InitialCapital, equity, months)
 
 	return BacktestResult{
 		EquityCurve:    equityCurve,
