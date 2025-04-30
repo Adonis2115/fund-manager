@@ -114,11 +114,11 @@ func RunBacktest(ctx context.Context, cfg BacktestConfig) BacktestResult {
 				exitPrice := getLatestClose(ctx, cfg.Service, sym, monthDate)
 				entryPrice := entryPrices[sym]
 				daysHeld := int(monthDate.Sub(entryDates[sym]).Hours() / 24)
-				profit := exitPrice - entryPrice
-				profitPct := (profit / entryPrice) * 100
 				alloc := cfg.InitialCapital / float64(cfg.TopN)
 				quantity := math.Floor(alloc / entryPrice)
+				profit := (exitPrice - entryPrice) * quantity
 				amount := quantity * entryPrice
+				profitPct := (profit / amount) * 100
 				tradeLogs = append(tradeLogs, TradeLog{
 					Symbol:     sym,
 					EntryDate:  entryDates[sym],
@@ -143,11 +143,11 @@ func RunBacktest(ctx context.Context, cfg BacktestConfig) BacktestResult {
 		entryPrice := entryPrices[sym]
 		exitPrice := getLatestClose(ctx, cfg.Service, sym, cfg.EndDate)
 		daysHeld := int(cfg.EndDate.Sub(entryDates[sym]).Hours() / 24)
-		profit := exitPrice - entryPrice
-		profitPct := (profit / entryPrice) * 100
 		alloc := cfg.InitialCapital / float64(cfg.TopN)
 		quantity := math.Floor(alloc / entryPrice)
 		amount := quantity * entryPrice
+		profit := (exitPrice - entryPrice) * quantity
+		profitPct := (profit / amount) * 100
 
 		tradeLogs = append(tradeLogs, TradeLog{
 			Symbol:     sym,

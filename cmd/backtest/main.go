@@ -34,8 +34,14 @@ func main() {
 	}
 
 	result := backtest.RunBacktest(ctx, cfg)
-	fmt.Printf("Backtest completed. CAGR: %.2f%% | Max Drawdown: %.2f%% | WinRate: %.2f%%\n",
-		result.CAGR*100, result.Drawdown*100, result.WinRate*100)
+	fmt.Printf("Backtest completed.\n")
+	fmt.Printf("CAGR: %.2f%%\n", result.CAGR*100)
+	fmt.Printf("Max Drawdown: %.2f%%\n", result.Drawdown*100)
+	fmt.Printf("Total Trades: %d\n", result.TotalTrades)
+	fmt.Printf("Winning Trades: %d\n", result.WinningTrades)
+	fmt.Printf("Win Rate: %.2f%%\n", result.WinRate*100)
+	fmt.Printf("Average Profit: %.2f\n", result.AverageProfit)
+	fmt.Printf("Net Profit: %.2f\n", result.EquityCurve[len(result.EquityCurve)-1]-cfg.InitialCapital)
 
 	err = exportTradeLogsToCSV("trade_logs.csv", result.TradeLogs)
 	if err != nil {
