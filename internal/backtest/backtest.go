@@ -10,7 +10,6 @@ import (
 	"time"
 
 	"github.com/jackc/pgx/v5/pgtype"
-	"golang.org/x/exp/slices"
 )
 
 type BacktestConfig struct {
@@ -36,16 +35,17 @@ type TradeLog struct {
 }
 
 type BacktestResult struct {
-	TotalTrades    int
-	WinningTrades  int
-	WinRate        float64
-	AverageProfit  float64
 	TradeLogs      []TradeLog
 	EquityCurve    []float64
 	MonthlyReturns []float64
 	Drawdown       float64
 	CAGR           float64
 	PortfolioLog   [][]string
+	TotalTrades    int
+	WinningTrades  int
+	WinRate        float64
+	AverageProfit  float64
+	Profit         float64
 }
 
 func RunBacktest(ctx context.Context, cfg BacktestConfig) BacktestResult {
@@ -54,9 +54,7 @@ func RunBacktest(ctx context.Context, cfg BacktestConfig) BacktestResult {
 	monthlyReturns := make([]float64, 0)
 	portfolioLog := make([][]string, 0)
 
-	// Removed: var previousPrices = make(map[string]float64)
 	tradeLogs := make([]TradeLog, 0)
-
 	currentPortfolio := make(map[string]struct{})
 	entryPrices := make(map[string]float64)
 	entryDates := make(map[string]time.Time)
@@ -81,33 +79,18 @@ func RunBacktest(ctx context.Context, cfg BacktestConfig) BacktestResult {
 
 		newPortfolio := make(map[string]struct{})
 		currentSymbols := make([]string, 0, len(rows))
+		monthProfit := 0.0
 
-		monthlyReturn := 0.0
-		count := 0
 		for _, row := range rows {
-			newPortfolio[row.Symbol] = struct{}{}
-			currentSymbols = append(currentSymbols, row.Symbol)
-
 			price := getLatestClose(ctx, cfg.Service, row.Symbol, monthDate)
 			if _, held := currentPortfolio[row.Symbol]; !held {
 				entryPrices[row.Symbol] = price
 				entryDates[row.Symbol] = monthDate
 			}
-
 			newPortfolio[row.Symbol] = struct{}{}
 			currentSymbols = append(currentSymbols, row.Symbol)
 		}
 
-		if count > 0 {
-			monthlyReturn = monthlyReturn / float64(count)
-		} else {
-			monthlyReturn = 0
-		}
-
-		equity = equity * (1 + monthlyReturn)
-		equityCurve = append(equityCurve, equity)
-		monthlyReturns = append(monthlyReturns, monthlyReturn)
-		portfolioLog = append(portfolioLog, currentSymbols)
 		// Exit stocks not in newPortfolio
 		for sym := range currentPortfolio {
 			if _, stillHeld := newPortfolio[sym]; !stillHeld {
@@ -116,9 +99,10 @@ func RunBacktest(ctx context.Context, cfg BacktestConfig) BacktestResult {
 				daysHeld := int(monthDate.Sub(entryDates[sym]).Hours() / 24)
 				alloc := cfg.InitialCapital / float64(cfg.TopN)
 				quantity := math.Floor(alloc / entryPrice)
-				profit := (exitPrice - entryPrice) * quantity
 				amount := quantity * entryPrice
+				profit := (exitPrice - entryPrice) * quantity
 				profitPct := (profit / amount) * 100
+
 				tradeLogs = append(tradeLogs, TradeLog{
 					Symbol:     sym,
 					EntryDate:  entryDates[sym],
@@ -131,14 +115,21 @@ func RunBacktest(ctx context.Context, cfg BacktestConfig) BacktestResult {
 					Quantity:   quantity,
 					AmountUsed: amount,
 				})
+
+				monthProfit += profit
 				delete(entryPrices, sym)
 				delete(entryDates, sym)
 			}
 		}
+
+		equity += monthProfit
+		equityCurve = append(equityCurve, equity)
+		monthlyReturns = append(monthlyReturns, monthProfit/cfg.InitialCapital)
+		portfolioLog = append(portfolioLog, currentSymbols)
 		currentPortfolio = newPortfolio
 	}
 
-	// Log open positions at end of backtest
+	// Final exits
 	for sym := range currentPortfolio {
 		entryPrice := entryPrices[sym]
 		exitPrice := getLatestClose(ctx, cfg.Service, sym, cfg.EndDate)
@@ -161,23 +152,11 @@ func RunBacktest(ctx context.Context, cfg BacktestConfig) BacktestResult {
 			Quantity:   quantity,
 			AmountUsed: amount,
 		})
+
+		equity += profit
+		equityCurve = append(equityCurve, equity)
 	}
 
-	dd := maxDrawdown(equityCurve)
-	months := int(cfg.EndDate.Sub(cfg.StartDate).Hours() / (24 * 30))
-	cagr := computeCAGR(cfg.InitialCapital, equity, months)
-
-	// Sort trade logs by EntryDate
-	slices.SortFunc(tradeLogs, func(a, b TradeLog) int {
-		if a.EntryDate.Before(b.EntryDate) {
-			return -1
-		} else if a.EntryDate.After(b.EntryDate) {
-			return 1
-		}
-		return 0
-	})
-
-	// Calculate stats
 	total := len(tradeLogs)
 	wins := 0
 	sumProfits := 0.0
@@ -187,6 +166,7 @@ func RunBacktest(ctx context.Context, cfg BacktestConfig) BacktestResult {
 		}
 		sumProfits += t.Profit
 	}
+
 	winRate := 0.0
 	avgProfit := 0.0
 	if total > 0 {
@@ -194,17 +174,22 @@ func RunBacktest(ctx context.Context, cfg BacktestConfig) BacktestResult {
 		avgProfit = sumProfits / float64(total)
 	}
 
+	months := int(cfg.EndDate.Sub(cfg.StartDate).Hours() / (24 * 30))
+	cagr := computeCAGR(cfg.InitialCapital, equity, months)
+	drawdown := maxDrawdown(equityCurve)
+
 	return BacktestResult{
 		TradeLogs:      tradeLogs,
 		EquityCurve:    equityCurve,
 		MonthlyReturns: monthlyReturns,
-		Drawdown:       dd,
+		Drawdown:       drawdown,
 		CAGR:           cagr,
 		PortfolioLog:   portfolioLog,
 		TotalTrades:    total,
 		WinningTrades:  wins,
 		WinRate:        winRate,
 		AverageProfit:  avgProfit,
+		Profit:         sumProfits,
 	}
 }
 
@@ -223,7 +208,6 @@ func getLatestClose(ctx context.Context, s *services.Service, symbol string, dat
 		log.Printf("Failed to get latest close for %s at %s: %v", symbol, date.Format("2006-01-02"), err)
 		return 0
 	}
-
 	f64, err := result.Float64Value()
 	if err != nil {
 		log.Printf("Error converting pgtype.Numeric to float64 for %s: %v", symbol, err)

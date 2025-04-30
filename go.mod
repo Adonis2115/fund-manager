@@ -20,7 +20,6 @@ require (
 	github.com/jackc/puddle/v2 v2.2.2 // indirect
 	github.com/piquette/finance-go v1.1.0
 	golang.org/x/crypto v0.31.0 // indirect
-	golang.org/x/exp v0.0.0-20250408133849-7e4ce0ab07d0
 	golang.org/x/sync v0.13.0 // indirect
 	golang.org/x/text v0.21.0 // indirect
 )
