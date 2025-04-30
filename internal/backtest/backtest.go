@@ -13,12 +13,13 @@ import (
 )
 
 type BacktestConfig struct {
-	StartDate      time.Time
-	EndDate        time.Time
-	TopN           int32
-	ScriptType     string
-	InitialCapital float64
-	Service        *services.Service
+	StartDate            time.Time
+	EndDate              time.Time
+	TopN                 int32
+	ScriptType           string
+	InitialCapital       float64
+	Service              *services.Service
+	NumberOfMonthsReturn int32
 }
 
 type TradeLog struct {
@@ -66,7 +67,7 @@ func RunBacktest(ctx context.Context, cfg BacktestConfig) BacktestResult {
 		}
 		params := repository.GetTopStocksByReturnParams{
 			Column1: toPgTimestamp(monthDate),
-			Column2: 12,
+			Column2: cfg.NumberOfMonthsReturn,
 			Column3: cfg.ScriptType,
 			Limit:   cfg.TopN,
 		}
