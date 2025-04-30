@@ -37,7 +37,7 @@ func main() {
 	input := repository.GetTopStocksByReturnParams{
 		Column1: ts,
 		Column2: 12,
-		Column3: "large",
+		Column3: "all",
 		Limit:   10,
 	}
 
