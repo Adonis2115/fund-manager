@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+	"fund-manager/services"
 	initializers "fund-manager/utils"
 )
 
@@ -9,7 +11,6 @@ func init() {
 }
 
 func main() {
-	// stockls := services.AddStock()
-	// stockls := services.GetStockList()
-	// log.Println(stockls)
+	stockList := services.GetTopStocksByReturn()
+	fmt.Println(stockList)
 }

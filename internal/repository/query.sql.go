@@ -139,3 +139,94 @@ func (q *Queries) GetStocks(ctx context.Context) ([]Stock, error) {
 	}
 	return items, nil
 }
+
+const getTopStocksByReturn = `-- name: GetTopStocksByReturn :many
+WITH one_year_ago_prices AS (
+    SELECT DISTINCT ON (d.stockid)
+        d.stockid,
+        d.close
+    FROM
+        daily d
+    JOIN stocks s ON d.stockid = s.id
+    WHERE
+        d.timestamp <= ($1::timestamp - make_interval(months => $2::int))
+        AND d.close IS NOT NULL
+        AND d.close != 0
+        AND ($3 = 'all' OR s.scriptType = $3)
+    ORDER BY d.stockid, d.timestamp DESC
+),
+latest_prices AS (
+    SELECT DISTINCT ON (d.stockid)
+        d.stockid,
+        d.close
+    FROM
+        daily d
+    JOIN stocks s ON d.stockid = s.id
+    WHERE
+        d.timestamp <= $1::timestamp
+        AND d.close IS NOT NULL
+        AND d.close != 0
+        AND ($3 = 'all' OR s.scriptType = $3)
+    ORDER BY d.stockid, d.timestamp DESC
+),
+stock_returns AS (
+    SELECT
+        l.stockid,
+        ROUND((l.close - o.close) / o.close * 100)::int AS return_percentage
+    FROM latest_prices l
+    JOIN one_year_ago_prices o ON l.stockid = o.stockid
+)
+SELECT
+    s.id,
+    s.name,
+    s.symbol,
+    sr.return_percentage
+FROM stock_returns sr
+JOIN stocks s ON sr.stockid = s.id
+ORDER BY sr.return_percentage DESC
+LIMIT $4
+`
+
+type GetTopStocksByReturnParams struct {
+	Column1 pgtype.Timestamp
+	Column2 int32
+	Column3 interface{}
+	Limit   int32
+}
+
+type GetTopStocksByReturnRow struct {
+	ID               pgtype.UUID
+	Name             string
+	Symbol           string
+	ReturnPercentage int32
+}
+
+func (q *Queries) GetTopStocksByReturn(ctx context.Context, arg GetTopStocksByReturnParams) ([]GetTopStocksByReturnRow, error) {
+	rows, err := q.db.Query(ctx, getTopStocksByReturn,
+		arg.Column1,
+		arg.Column2,
+		arg.Column3,
+		arg.Limit,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetTopStocksByReturnRow
+	for rows.Next() {
+		var i GetTopStocksByReturnRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.Symbol,
+			&i.ReturnPercentage,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
