@@ -4,8 +4,8 @@ import (
 	"context"
 	"encoding/csv"
 	"fmt"
+	config "fund-manager/config"
 	"fund-manager/internal/repository"
-	initializers "fund-manager/utils"
 	"log"
 	"os"
 	"strings"
@@ -16,7 +16,7 @@ import (
 )
 
 func init() {
-	initializers.LoadEnv()
+	config.LoadEnv()
 }
 
 func main() {

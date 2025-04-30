@@ -2,9 +2,9 @@ package main
 
 import (
 	"fmt"
+	config "fund-manager/config"
 	"fund-manager/internal/repository"
-	"fund-manager/services"
-	initializers "fund-manager/utils"
+	"fund-manager/internal/services"
 	"log"
 	"time"
 
@@ -12,7 +12,7 @@ import (
 )
 
 func init() {
-	initializers.ConnectToDb()
+	config.ConnectToDb()
 }
 
 func main() {

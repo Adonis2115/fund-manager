@@ -3,8 +3,8 @@ package main
 import (
 	"context"
 	"fmt"
+	config "fund-manager/config"
 	"fund-manager/internal/repository"
-	initializers "fund-manager/utils"
 	"log"
 	"os"
 	"time"
@@ -18,7 +18,7 @@ import (
 )
 
 func init() {
-	initializers.LoadEnv()
+	config.LoadEnv()
 }
 
 func main() {

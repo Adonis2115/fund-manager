@@ -2,14 +2,14 @@ package services
 
 import (
 	"context"
+	config "fund-manager/config"
 	"fund-manager/internal/repository"
-	initializers "fund-manager/utils"
 	"log"
 )
 
 func GetStockList() []repository.Stock {
 	ctx := context.Background()
-	stockList, err := initializers.Queries.GetStocks(ctx)
+	stockList, err := config.Queries.GetStocks(ctx)
 
 	if err != nil {
 		log.Fatal(err)
@@ -19,7 +19,7 @@ func GetStockList() []repository.Stock {
 
 func GetTopStocksByReturn(inputTop repository.GetTopStocksByReturnParams) []repository.GetTopStocksByReturnRow {
 	ctx := context.Background()
-	stockListByReturn, err := initializers.Queries.GetTopStocksByReturn(ctx, inputTop)
+	stockListByReturn, err := config.Queries.GetTopStocksByReturn(ctx, inputTop)
 	if err != nil {
 		log.Fatal(err)
 	}
