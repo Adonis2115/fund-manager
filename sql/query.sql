@@ -73,3 +73,11 @@ FROM stock_returns sr
 JOIN stocks s ON sr.stockid = s.id
 ORDER BY sr.return_percentage DESC
 LIMIT $4;
+
+-- name: GetLatestClosePrice :one
+SELECT close
+FROM daily d
+JOIN stocks s ON d.stockid = s.id
+WHERE s.symbol = $1 AND d.timestamp <= $2
+ORDER BY d.timestamp DESC
+LIMIT 1;

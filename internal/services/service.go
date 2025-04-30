@@ -3,11 +3,14 @@ package services
 import (
 	"context"
 	"fund-manager/internal/repository"
+
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 type QueryInterface interface {
 	GetStocks(ctx context.Context) ([]repository.Stock, error)
 	GetTopStocksByReturn(ctx context.Context, input repository.GetTopStocksByReturnParams) ([]repository.GetTopStocksByReturnRow, error)
+	GetLatestClosePrice(ctx context.Context, input repository.GetLatestClosePriceParams) (pgtype.Numeric, error) // ✅ Add this line
 }
 
 type Service struct {
@@ -24,4 +27,8 @@ func (s *Service) GetTopStocksByReturn(ctx context.Context, input repository.Get
 
 func (s *Service) GetStockList(ctx context.Context) ([]repository.Stock, error) {
 	return s.Queries.GetStocks(ctx)
+}
+
+func (s *Service) GetLatestClose(ctx context.Context, input repository.GetLatestClosePriceParams) (pgtype.Numeric, error) {
+	return s.Queries.GetLatestClosePrice(ctx, input)
 }

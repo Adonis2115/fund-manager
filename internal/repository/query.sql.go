@@ -81,6 +81,27 @@ func (q *Queries) CreateStock(ctx context.Context, arg CreateStockParams) (Stock
 	return i, err
 }
 
+const getLatestClosePrice = `-- name: GetLatestClosePrice :one
+SELECT close
+FROM daily d
+JOIN stocks s ON d.stockid = s.id
+WHERE s.symbol = $1 AND d.timestamp <= $2
+ORDER BY d.timestamp DESC
+LIMIT 1
+`
+
+type GetLatestClosePriceParams struct {
+	Symbol    string
+	Timestamp pgtype.Timestamp
+}
+
+func (q *Queries) GetLatestClosePrice(ctx context.Context, arg GetLatestClosePriceParams) (pgtype.Numeric, error) {
+	row := q.db.QueryRow(ctx, getLatestClosePrice, arg.Symbol, arg.Timestamp)
+	var close pgtype.Numeric
+	err := row.Scan(&close)
+	return close, err
+}
+
 const getStock = `-- name: GetStock :one
 SELECT id, created_at, updated_at, name, symbol, customsymbol, scripttype, industry, isin, fno FROM stocks
 WHERE id = $1 LIMIT 1
