@@ -5,8 +5,13 @@ import (
 	"fund-manager/internal/repository"
 )
 
+type QueryInterface interface {
+	GetStocks(ctx context.Context) ([]repository.Stock, error)
+	GetTopStocksByReturn(ctx context.Context, input repository.GetTopStocksByReturnParams) ([]repository.GetTopStocksByReturnRow, error)
+}
+
 type Service struct {
-	Queries *repository.Queries
+	Queries QueryInterface
 }
 
 func NewService(queries *repository.Queries) *Service {
