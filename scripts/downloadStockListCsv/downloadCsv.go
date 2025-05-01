@@ -18,7 +18,7 @@ var stockList = []StockSegment{
 	{Cap: "large", URL: "https://nsearchives.nseindia.com/content/indices/ind_nifty100list.csv"},
 	{Cap: "mid", URL: "https://nsearchives.nseindia.com/content/indices/ind_niftymidcap150list.csv"},
 	{Cap: "small", URL: "https://nsearchives.nseindia.com/content/indices/ind_niftysmallcap250list.csv"},
-	{Cap: "micro", URL: "https://nsearchives.nseindia.com/content/indices/ind_niftymicrocap250_list.csv"},
+	// {Cap: "micro", URL: "https://nsearchives.nseindia.com/content/indices/ind_niftymicrocap250_list.csv"},
 }
 
 const dataDir = "data"

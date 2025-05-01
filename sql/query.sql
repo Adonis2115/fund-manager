@@ -32,35 +32,35 @@ INSERT INTO daily (
 WITH one_year_ago_prices AS (
     SELECT DISTINCT ON (d.stockid)
         d.stockid,
-        d.close
+        d.adjClose
     FROM
         daily d
     JOIN stocks s ON d.stockid = s.id
     WHERE
         d.timestamp <= ($1::timestamp - make_interval(months => $2::int))
-        AND d.close IS NOT NULL
-        AND d.close != 0
+        AND d.adjClose IS NOT NULL
+        AND d.adjClose != 0
         AND ($3 = 'all' OR s.scriptType = $3)
     ORDER BY d.stockid, d.timestamp DESC
 ),
 latest_prices AS (
     SELECT DISTINCT ON (d.stockid)
         d.stockid,
-        d.close
+        d.adjClose
     FROM
         daily d
     JOIN stocks s ON d.stockid = s.id
     WHERE
         d.timestamp <= $1::timestamp
-        AND d.close IS NOT NULL
-        AND d.close != 0
+        AND d.adjClose IS NOT NULL
+        AND d.adjClose != 0
         AND ($3 = 'all' OR s.scriptType = $3)
     ORDER BY d.stockid, d.timestamp DESC
 ),
 stock_returns AS (
     SELECT
         l.stockid,
-        ROUND((l.close - o.close) / o.close * 100)::int AS return_percentage
+        ROUND((l.adjClose - o.adjClose) / o.adjClose * 100)::int AS return_percentage
     FROM latest_prices l
     JOIN one_year_ago_prices o ON l.stockid = o.stockid
 )
@@ -75,9 +75,20 @@ ORDER BY sr.return_percentage DESC
 LIMIT $4;
 
 -- name: GetLatestClosePrice :one
-SELECT close
+SELECT adjClose
 FROM daily d
 JOIN stocks s ON d.stockid = s.id
 WHERE s.symbol = $1 AND d.timestamp <= $2
+AND d.adjclose IS NOT NULL
 ORDER BY d.timestamp DESC
 LIMIT 1;
+
+-- name: GetHistoricalStockPrices :many
+SELECT d.timestamp, d.adjClose
+FROM daily d
+JOIN stocks s ON d.stockid = s.id
+WHERE s.symbol = $1
+  AND d.timestamp >= $2
+  AND d.timestamp <= $3
+  AND d.adjClose IS NOT NULL
+ORDER BY d.timestamp;

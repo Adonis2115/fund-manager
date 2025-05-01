@@ -25,13 +25,12 @@ func main() {
 	service := services.NewService(queries)
 
 	cfg := backtest.BacktestConfig{
-		StartDate:            time.Date(2024, 9, 1, 0, 0, 0, 0, time.UTC),
-		EndDate:              time.Date(2025, 4, 30, 0, 0, 0, 0, time.UTC),
-		TopN:                 10,
-		ScriptType:           "all",
-		InitialCapital:       1000000,
-		Service:              service,
-		NumberOfMonthsReturn: 12,
+		StartDate:      time.Date(2024, 7, 1, 0, 0, 0, 0, time.UTC),
+		EndDate:        time.Date(2025, 4, 30, 0, 0, 0, 0, time.UTC),
+		TopN:           10,
+		ScriptType:     "all",
+		InitialCapital: 1000000,
+		Service:        service,
 	}
 
 	result := backtest.RunBacktest(ctx, cfg)
@@ -61,7 +60,7 @@ func exportTradeLogsToCSV(filename string, trades []backtest.TradeLog) error {
 	writer := csv.NewWriter(file)
 	defer writer.Flush()
 
-	headers := []string{"Symbol", "EntryDate", "ExitDate", "EntryPrice", "ExitPrice", "Profit", "ProfitPct", "DaysHeld", "Quantity", "AmountUsed"}
+	headers := []string{"Symbol", "EntryDate", "ExitDate", "EntryPrice", "ExitPrice", "Profit", "ProfitPct", "DaysHeld", "Quantity", "AmountUsed", "MaxDrawDown"}
 	if err := writer.Write(headers); err != nil {
 		return err
 	}
@@ -78,6 +77,7 @@ func exportTradeLogsToCSV(filename string, trades []backtest.TradeLog) error {
 			strconv.Itoa(trade.DaysHeld),
 			fmt.Sprintf("%.0f", trade.Quantity),
 			fmt.Sprintf("%.2f", trade.AmountUsed),
+			fmt.Sprintf("%.2f", trade.MaxDrawdown),
 		}
 		if err := writer.Write(record); err != nil {
 			return err

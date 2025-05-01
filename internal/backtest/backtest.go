@@ -13,26 +13,26 @@ import (
 )
 
 type BacktestConfig struct {
-	StartDate            time.Time
-	EndDate              time.Time
-	TopN                 int32
-	ScriptType           string
-	InitialCapital       float64
-	Service              *services.Service
-	NumberOfMonthsReturn int32
+	StartDate      time.Time
+	EndDate        time.Time
+	TopN           int32
+	ScriptType     string
+	InitialCapital float64
+	Service        *services.Service
 }
 
 type TradeLog struct {
-	Symbol     string
-	EntryDate  time.Time
-	ExitDate   time.Time
-	EntryPrice float64
-	ExitPrice  float64
-	Profit     float64
-	ProfitPct  float64
-	DaysHeld   int
-	Quantity   float64
-	AmountUsed float64
+	Symbol      string
+	EntryDate   time.Time
+	ExitDate    time.Time
+	EntryPrice  float64
+	ExitPrice   float64
+	Profit      float64
+	ProfitPct   float64
+	DaysHeld    int
+	Quantity    float64
+	AmountUsed  float64
+	MaxDrawdown float64 // New field for individual stock drawdown
 }
 
 type BacktestResult struct {
@@ -67,7 +67,7 @@ func RunBacktest(ctx context.Context, cfg BacktestConfig) BacktestResult {
 		}
 		params := repository.GetTopStocksByReturnParams{
 			Column1: toPgTimestamp(monthDate),
-			Column2: cfg.NumberOfMonthsReturn,
+			Column2: 12,
 			Column3: cfg.ScriptType,
 			Limit:   cfg.TopN,
 		}
@@ -105,16 +105,17 @@ func RunBacktest(ctx context.Context, cfg BacktestConfig) BacktestResult {
 				profitPct := (profit / amount) * 100
 
 				tradeLogs = append(tradeLogs, TradeLog{
-					Symbol:     sym,
-					EntryDate:  entryDates[sym],
-					ExitDate:   monthDate,
-					EntryPrice: entryPrice,
-					ExitPrice:  exitPrice,
-					Profit:     profit,
-					ProfitPct:  profitPct,
-					DaysHeld:   daysHeld,
-					Quantity:   quantity,
-					AmountUsed: amount,
+					Symbol:      sym,
+					EntryDate:   entryDates[sym],
+					ExitDate:    monthDate,
+					EntryPrice:  entryPrice,
+					ExitPrice:   exitPrice,
+					Profit:      profit,
+					ProfitPct:   profitPct,
+					DaysHeld:    daysHeld,
+					Quantity:    quantity,
+					AmountUsed:  amount,
+					MaxDrawdown: getStockDrawdown(ctx, cfg, sym, entryDates[sym], monthDate),
 				})
 
 				monthProfit += profit
@@ -142,16 +143,17 @@ func RunBacktest(ctx context.Context, cfg BacktestConfig) BacktestResult {
 		profitPct := (profit / amount) * 100
 
 		tradeLogs = append(tradeLogs, TradeLog{
-			Symbol:     sym,
-			EntryDate:  entryDates[sym],
-			ExitDate:   cfg.EndDate,
-			EntryPrice: entryPrice,
-			ExitPrice:  exitPrice,
-			Profit:     profit,
-			ProfitPct:  profitPct,
-			DaysHeld:   daysHeld,
-			Quantity:   quantity,
-			AmountUsed: amount,
+			Symbol:      sym,
+			EntryDate:   entryDates[sym],
+			ExitDate:    cfg.EndDate,
+			EntryPrice:  entryPrice,
+			ExitPrice:   exitPrice,
+			Profit:      profit,
+			ProfitPct:   profitPct,
+			DaysHeld:    daysHeld,
+			Quantity:    quantity,
+			AmountUsed:  amount,
+			MaxDrawdown: getStockDrawdown(ctx, cfg, sym, entryDates[sym], cfg.EndDate),
 		})
 
 		equity += profit
@@ -225,6 +227,43 @@ func maxDrawdown(equity []float64) float64 {
 			peak = v
 		}
 		drawdown := (peak - v) / peak
+		if drawdown > maxDD {
+			maxDD = drawdown
+		}
+	}
+	return maxDD
+}
+
+func getStockDrawdown(ctx context.Context, cfg BacktestConfig, symbol string, start, end time.Time) float64 {
+	query := repository.GetHistoricalStockPricesParams{
+		Symbol:      symbol,
+		Timestamp:   toPgTimestamp(start),
+		Timestamp_2: toPgTimestamp(end),
+	}
+	prices, err := cfg.Service.GetStockPrices(ctx, query)
+	if err != nil || len(prices) == 0 {
+		log.Printf("Error fetching prices for drawdown: %s: %v", symbol, err)
+		return 0
+	}
+
+	peakF, err := prices[0].Adjclose.Float64Value()
+	if err != nil {
+		log.Printf("Invalid peak value for %s: %v", symbol, err)
+		return 0
+	}
+	peak := peakF.Float64
+	maxDD := 0.0
+	for _, p := range prices {
+		closeF, err := p.Adjclose.Float64Value()
+		if err != nil {
+			log.Printf("Invalid price for %s: %v", symbol, err)
+			continue
+		}
+		price := closeF.Float64
+		if price > peak {
+			peak = price
+		}
+		drawdown := (peak - price) / peak
 		if drawdown > maxDD {
 			maxDD = drawdown
 		}

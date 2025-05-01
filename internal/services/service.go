@@ -10,7 +10,8 @@ import (
 type QueryInterface interface {
 	GetStocks(ctx context.Context) ([]repository.Stock, error)
 	GetTopStocksByReturn(ctx context.Context, input repository.GetTopStocksByReturnParams) ([]repository.GetTopStocksByReturnRow, error)
-	GetLatestClosePrice(ctx context.Context, input repository.GetLatestClosePriceParams) (pgtype.Numeric, error) // ✅ Add this line
+	GetLatestClosePrice(ctx context.Context, input repository.GetLatestClosePriceParams) (pgtype.Numeric, error)
+	GetHistoricalStockPrices(ctx context.Context, input repository.GetHistoricalStockPricesParams) ([]repository.GetHistoricalStockPricesRow, error)
 }
 
 type Service struct {
@@ -31,4 +32,8 @@ func (s *Service) GetStockList(ctx context.Context) ([]repository.Stock, error) 
 
 func (s *Service) GetLatestClose(ctx context.Context, input repository.GetLatestClosePriceParams) (pgtype.Numeric, error) {
 	return s.Queries.GetLatestClosePrice(ctx, input)
+}
+
+func (s *Service) GetStockPrices(ctx context.Context, input repository.GetHistoricalStockPricesParams) ([]repository.GetHistoricalStockPricesRow, error) {
+	return s.Queries.GetHistoricalStockPrices(ctx, input)
 }
