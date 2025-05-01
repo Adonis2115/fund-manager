@@ -26,7 +26,7 @@ func main() {
 
 	cfg := backtest.BacktestConfig{
 		StartDate:            time.Date(2024, 9, 1, 0, 0, 0, 0, time.UTC),
-		EndDate:              time.Date(2025, 5, 30, 0, 0, 0, 0, time.UTC),
+		EndDate:              time.Date(2025, 4, 30, 0, 0, 0, 0, time.UTC),
 		TopN:                 10,
 		ScriptType:           "all",
 		InitialCapital:       1000000,
