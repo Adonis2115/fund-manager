@@ -67,7 +67,7 @@ func exportStockListToCSV(filename string, stockList []repository.GetTopStocksBy
 
 	for _, stock := range stockList {
 		record := []string{
-			fmt.Sprintf("%.2s,", stock.Symbol),
+			stock.Symbol,
 		}
 		if err := writer.Write(record); err != nil {
 			return err
