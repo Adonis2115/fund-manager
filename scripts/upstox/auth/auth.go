@@ -10,6 +10,7 @@ import (
 	"net/url"
 	"os"
 	"os/exec"
+	"sync"
 )
 
 func init() {
@@ -17,6 +18,10 @@ func init() {
 }
 
 func main() {
+
+	var wg sync.WaitGroup
+	wg.Add(1) // We will wait for 1 thing (authCode to be set)
+
 	var (
 		clientID     = os.Getenv("UPSTOX_API_KEY")
 		clientSecret = os.Getenv("UPSTOX_API_SECRET")
@@ -39,6 +44,7 @@ func main() {
 		}
 		authCode = code
 		fmt.Fprintln(w, "Authorization successful! You can close this window.")
+		wg.Done() // signal that we're done
 	})
 
 	ln, err := net.Listen("tcp", ":3000")
@@ -52,10 +58,7 @@ func main() {
 	fmt.Println("Opening browser for authentication...")
 	exec.Command("open", authQuery).Start() // Use "xdg-open" on Linux or "start" on Windows
 
-	// Wait for the user to complete auth
-	for authCode == "" {
-		// Busy wait for callback to hit
-	}
+	wg.Wait()
 
 	// Step 3: Exchange code for token
 	data := url.Values{}
@@ -79,4 +82,11 @@ func main() {
 	fmt.Println("Access Token Response:")
 	prettyJSON, _ := json.MarshalIndent(tokenResp, "", "  ")
 	fmt.Println(string(prettyJSON))
+
+	// ✅ Save to file
+	filePath := "data/access_token.json"
+	if err := os.WriteFile(filePath, prettyJSON, 0644); err != nil {
+		log.Fatalf("Failed to save token to file: %v", err)
+	}
+	fmt.Printf("✔ Access token saved to %s\n", filePath)
 }
