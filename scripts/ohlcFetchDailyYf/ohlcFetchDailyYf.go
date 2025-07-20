@@ -47,7 +47,7 @@ func main() {
 func fetchAndStoreDailyData(ctx context.Context, queries *repository.Queries, stock repository.Stock) error {
 	now := time.Now()
 	params := &chart.Params{
-		Symbol:   stock.Customsymbol,
+		Symbol:   stock.Symbol + ".NS",
 		Start:    &datetime.Datetime{Month: 1, Day: 1, Year: 2021},
 		End:      &datetime.Datetime{Month: int(now.Month()), Day: int(now.Day() - 1), Year: int(now.Year())},
 		Interval: datetime.OneDay,
@@ -79,30 +79,24 @@ func fetchAndStoreDailyData(ctx context.Context, queries *repository.Queries, st
 			log.Printf("Invalid Close for %s: %v", stock.Symbol, err)
 			continue
 		}
-		adjClose, err := DecimalToPgNumeric(bar.AdjClose)
-		if err != nil {
-			log.Printf("Invalid AdjClose for %s: %v", stock.Symbol, err)
-			continue
-		}
-		timestamp, err := IntToPgTimestamp(int64(bar.Timestamp))
-		if err != nil {
-			log.Printf("Invalid Timestamp for %s: %v", stock.Symbol, err)
-			continue
-		}
+		timestamp := time.Unix(int64(bar.Timestamp), 0)
+		dateOnly := time.Date(timestamp.Year(), timestamp.Month(), timestamp.Day(), 0, 0, 0, 0, time.UTC)
 
 		record := repository.BulkCreateDailyParams{
-			ID:       pgtype.UUID{Bytes: uuid.New(), Valid: true},
-			Stockid:  stock.ID,
-			Open:     open,
-			High:     high,
-			Low:      low,
-			Close:    closePrice,
-			Adjclose: adjClose,
+			ID:      pgtype.UUID{Bytes: uuid.New(), Valid: true},
+			Stockid: stock.ID,
+			Open:    open,
+			High:    high,
+			Low:     low,
+			Close:   closePrice,
 			Volume: pgtype.Int4{
 				Int32: int32(bar.Volume),
 				Valid: true,
 			},
-			Timestamp: timestamp,
+			Timestamp: pgtype.Date{
+				Time:  dateOnly,
+				Valid: true,
+			},
 		}
 		ohlcRecords = append(ohlcRecords, record)
 	}

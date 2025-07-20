@@ -35,7 +35,6 @@ func (r iteratorForBulkCreateDaily) Values() ([]interface{}, error) {
 		r.rows[0].High,
 		r.rows[0].Low,
 		r.rows[0].Close,
-		r.rows[0].Adjclose,
 		r.rows[0].Volume,
 		r.rows[0].Timestamp,
 	}, nil
@@ -46,7 +45,7 @@ func (r iteratorForBulkCreateDaily) Err() error {
 }
 
 func (q *Queries) BulkCreateDaily(ctx context.Context, arg []BulkCreateDailyParams) (int64, error) {
-	return q.db.CopyFrom(ctx, []string{"daily"}, []string{"id", "stockid", "open", "high", "low", "close", "adjclose", "volume", "timestamp"}, &iteratorForBulkCreateDaily{rows: arg})
+	return q.db.CopyFrom(ctx, []string{"daily"}, []string{"id", "stockid", "open", "high", "low", "close", "volume", "timestamp"}, &iteratorForBulkCreateDaily{rows: arg})
 }
 
 // iteratorForBulkCreateStocks implements pgx.CopyFromSource.
@@ -72,7 +71,6 @@ func (r iteratorForBulkCreateStocks) Values() ([]interface{}, error) {
 		r.rows[0].ID,
 		r.rows[0].Name,
 		r.rows[0].Symbol,
-		r.rows[0].Customsymbol,
 		r.rows[0].Scripttype,
 		r.rows[0].Industry,
 		r.rows[0].Isin,
@@ -85,5 +83,5 @@ func (r iteratorForBulkCreateStocks) Err() error {
 }
 
 func (q *Queries) BulkCreateStocks(ctx context.Context, arg []BulkCreateStocksParams) (int64, error) {
-	return q.db.CopyFrom(ctx, []string{"stocks"}, []string{"id", "name", "symbol", "customsymbol", "scripttype", "industry", "isin", "fno"}, &iteratorForBulkCreateStocks{rows: arg})
+	return q.db.CopyFrom(ctx, []string{"stocks"}, []string{"id", "name", "symbol", "scripttype", "industry", "isin", "fno"}, &iteratorForBulkCreateStocks{rows: arg})
 }

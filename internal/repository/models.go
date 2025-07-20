@@ -17,20 +17,18 @@ type Daily struct {
 	High      pgtype.Numeric
 	Low       pgtype.Numeric
 	Close     pgtype.Numeric
-	Adjclose  pgtype.Numeric
 	Volume    pgtype.Int4
-	Timestamp pgtype.Timestamp
+	Timestamp pgtype.Date
 }
 
 type Stock struct {
-	ID           pgtype.UUID
-	CreatedAt    pgtype.Timestamptz
-	UpdatedAt    pgtype.Timestamptz
-	Name         string
-	Symbol       string
-	Customsymbol string
-	Scripttype   string
-	Industry     pgtype.Text
-	Isin         pgtype.Text
-	Fno          bool
+	ID         pgtype.UUID
+	CreatedAt  pgtype.Timestamptz
+	UpdatedAt  pgtype.Timestamptz
+	Name       string
+	Symbol     string
+	Scripttype string
+	Industry   pgtype.Text
+	Isin       pgtype.Text
+	Fno        bool
 }

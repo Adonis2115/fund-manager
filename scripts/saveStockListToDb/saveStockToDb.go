@@ -74,14 +74,13 @@ func processStockCSV(ctx context.Context, queries *repository.Queries, filename 
 		}
 
 		stocks = append(stocks, repository.BulkCreateStocksParams{
-			ID:           pgtype.UUID{Bytes: uuid.New(), Valid: true},
-			Name:         record[0],
-			Symbol:       record[2],
-			Customsymbol: record[2] + ".NS",
-			Scripttype:   stockType,
-			Industry:     pgtype.Text{String: record[1], Valid: true},
-			Isin:         pgtype.Text{String: record[4], Valid: true},
-			Fno:          isFno,
+			ID:         pgtype.UUID{Bytes: uuid.New(), Valid: true},
+			Name:       record[0],
+			Symbol:     record[2],
+			Scripttype: stockType,
+			Industry:   pgtype.Text{String: record[1], Valid: true},
+			Isin:       pgtype.Text{String: record[4], Valid: true},
+			Fno:        isFno,
 		})
 	}
 

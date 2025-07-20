@@ -8,7 +8,7 @@ Aditya Birla Real Estate Ltd.,Forest Materials,ABREL,EQ,INE055A01016
 Aditya Birla Sun Life AMC Ltd.,Financial Services,ABSLAMC,EQ,INE404A01024
 Aegis Logistics Ltd.,Oil Gas & Consumable Fuels,AEGISLOG,EQ,INE208C01025
 Afcons Infrastructure Ltd.,Construction,AFCONS,EQ,INE101I01011
-Affle (India) Ltd.,Information Technology,AFFLE,EQ,INE00WC01027
+Affle 3i Ltd.,Information Technology,AFFLE,EQ,INE00WC01027
 Akums Drugs and Pharmaceuticals Ltd.,Healthcare,AKUMS,EQ,INE09XN01023
 Alembic Pharmaceuticals Ltd.,Healthcare,APLLTD,EQ,INE901L01018
 Alivus Life Sciences Ltd.,Healthcare,ALIVUS,EQ,INE03Q201024
@@ -57,6 +57,7 @@ Chennai Petroleum Corporation Ltd.,Oil Gas & Consumable Fuels,CHENNPETRO,EQ,INE1
 Cholamandalam Financial Holdings Ltd.,Financial Services,CHOLAHLDNG,EQ,INE149A01033
 City Union Bank Ltd.,Financial Services,CUB,EQ,INE491A01021
 Clean Science and Technology Ltd.,Chemicals,CLEAN,EQ,INE227W01023
+Cohance Lifesciences Ltd.,Healthcare,COHANCE,EQ,INE03QK01018
 Computer Age Management Services Ltd.,Financial Services,CAMS,EQ,INE596I01012
 Concord Biotech Ltd.,Healthcare,CONCORDBIO,EQ,INE338H01029
 Craftsman Automation Ltd.,Automobile and Auto Components,CRAFTSMAN,EQ,INE00LO01017
@@ -70,6 +71,7 @@ Deepak Fertilisers & Petrochemicals Corp. Ltd.,Chemicals,DEEPAKFERT,EQ,INE501A01
 Delhivery Ltd.,Services,DELHIVERY,EQ,INE148O01028
 Devyani International Ltd.,Consumer Services,DEVYANI,EQ,INE872J01023
 Dr. Lal Path Labs Ltd.,Healthcare,LALPATHLAB,EQ,INE600L01024
+Dummy Valor Estate Ltd.,Consumer Services,DUMMYDBRLT,BE,DUM879I01012
 E.I.D. Parry (India) Ltd.,Fast Moving Consumer Goods,EIDPARRY,EQ,INE126A01031
 EIH Ltd.,Consumer Services,EIHOTEL,EQ,INE230A01023
 Elecon Engineering Co. Ltd.,Capital Goods,ELECON,EQ,INE205B01031
@@ -195,7 +197,7 @@ RattanIndia Enterprises Ltd.,Consumer Services,RTNINDIA,EQ,INE834M01019
 Raymond Lifestyle Ltd.,Textiles,RAYMONDLSL,EQ,INE02ID01020
 Raymond Ltd.,Realty,RAYMOND,EQ,INE301A01014
 Redington Ltd.,Services,REDINGTON,EQ,INE891D01026
-Reliance Power Ltd.,Power,RPOWER,EQ,INE614G01033
+Reliance Power Ltd.,Power,RPOWER,BE,INE614G01033
 Route Mobile Ltd.,Telecommunication,ROUTE,EQ,INE450U01017
 SBFC Finance Ltd.,Financial Services,SBFC,EQ,INE423Y01016
 SKF India Ltd.,Capital Goods,SKFINDIA,EQ,INE640A01023
@@ -205,7 +207,7 @@ Sammaan Capital Ltd.,Financial Services,SAMMAANCAP,EQ,INE148I01020
 Sapphire Foods India Ltd.,Consumer Services,SAPPHIRE,EQ,INE806T01020
 Sarda Energy and Minerals Ltd.,Metals & Mining,SARDAEN,EQ,INE385C01021
 Saregama India Ltd,Media Entertainment & Publication,SAREGAMA,EQ,INE979A01025
-Schneider Electric Infrastructure Ltd.,Capital Goods,SCHNEIDER,EQ,INE839M01018
+Schneider Electric Infrastructure Ltd.,Capital Goods,SCHNEIDER,BE,INE839M01018
 Shipping Corporation of India Ltd.,Services,SCI,EQ,INE109A01011
 Shree Renuka Sugars Ltd.,Fast Moving Consumer Goods,RENUKA,EQ,INE087H01022
 Shyam Metalics and Energy Ltd.,Capital Goods,SHYAMMETL,EQ,INE810G01011
@@ -215,13 +217,12 @@ Sonata Software Ltd.,Information Technology,SONATSOFTW,EQ,INE269A01021
 Sterling and Wilson Renewable Energy Ltd.,Construction,SWSOLAR,EQ,INE00M201021
 Sumitomo Chemical India Ltd.,Chemicals,SUMICHEM,EQ,INE258G01013
 Sundram Fasteners Ltd.,Automobile and Auto Components,SUNDRMFAST,EQ,INE387A01021
-Suven Pharmaceuticals Ltd.,Healthcare,SUVENPHAR,EQ,INE03QK01018
 Swan Energy Ltd.,Chemicals,SWANENERGY,EQ,INE665A01038
 Syrma SGS Technology Ltd.,Capital Goods,SYRMA,EQ,INE0DYJ01015
 TBO Tek Ltd.,Consumer Services,TBOTEK,EQ,INE673O01025
 Tanla Platforms Ltd.,Information Technology,TANLA,EQ,INE483C01032
 Tata Chemicals Ltd.,Chemicals,TATACHEM,EQ,INE092A01019
-Tata Teleservices (Maharashtra) Ltd.,Telecommunication,TTML,EQ,INE517B01013
+Tata Teleservices (Maharashtra) Ltd.,Telecommunication,TTML,BE,INE517B01013
 Techno Electric & Engineering Company Ltd.,Construction,TECHNOE,EQ,INE285K01026
 Tejas Networks Ltd.,Telecommunication,TEJASNET,EQ,INE010J01012
 The Ramco Cements Ltd.,Construction Materials,RAMCOCEM,EQ,INE331A01037
@@ -235,7 +236,7 @@ UCO Bank,Financial Services,UCOBANK,EQ,INE691A01018
 UTI Asset Management Company Ltd.,Financial Services,UTIAMC,EQ,INE094J01016
 Usha Martin Ltd.,Capital Goods,USHAMART,EQ,INE228A01035
 V-Guard Industries Ltd.,Consumer Durables,VGUARD,EQ,INE951I01027
-Valor Estate Ltd.,Consumer Services,DBREALTY,EQ,INE879I01012
+Valor Estate Ltd.,Consumer Services,DBREALTY,BE,INE879I01012
 Vardhman Textiles Ltd.,Textiles,VTL,EQ,INE825A01020
 Vedant Fashions Ltd.,Consumer Services,MANYAVAR,EQ,INE825V01034
 Vijaya Diagnostic Centre Ltd.,Healthcare,VIJAYA,EQ,INE043W01024

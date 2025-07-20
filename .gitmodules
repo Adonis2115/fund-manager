@@ -1,0 +1,3 @@
+[submodule "data/nseDaily"]
+	path = data/nseDaily
+	url = https://github.com/BennyThadikaran/eod2_data.git

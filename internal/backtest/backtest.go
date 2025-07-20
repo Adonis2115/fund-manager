@@ -196,6 +196,12 @@ func RunBacktest(ctx context.Context, cfg BacktestConfig) BacktestResult {
 	}
 }
 
+func toPgDate(t time.Time) (d pgtype.Date) {
+	dateOnly := time.Date(t.Year(), t.Month(), t.Day(), 0, 0, 0, 0, time.UTC)
+	_ = d.Scan(dateOnly)
+	return
+}
+
 func toPgTimestamp(t time.Time) (ts pgtype.Timestamp) {
 	_ = ts.Scan(t)
 	return
@@ -204,7 +210,7 @@ func toPgTimestamp(t time.Time) (ts pgtype.Timestamp) {
 func getLatestClose(ctx context.Context, s *services.Service, symbol string, date time.Time) float64 {
 	input := repository.GetLatestClosePriceParams{
 		Symbol:    symbol,
-		Timestamp: toPgTimestamp(date),
+		Timestamp: toPgDate(date),
 	}
 	result, err := s.GetLatestClose(ctx, input)
 	if err != nil || !result.Valid {
@@ -237,8 +243,8 @@ func maxDrawdown(equity []float64) float64 {
 func getStockDrawdown(ctx context.Context, cfg BacktestConfig, symbol string, start, end time.Time) float64 {
 	query := repository.GetHistoricalStockPricesParams{
 		Symbol:      symbol,
-		Timestamp:   toPgTimestamp(start),
-		Timestamp_2: toPgTimestamp(end),
+		Timestamp:   toPgDate(start),
+		Timestamp_2: toPgDate(end),
 	}
 	prices, err := cfg.Service.GetStockPrices(ctx, query)
 	if err != nil || len(prices) == 0 {
@@ -246,7 +252,7 @@ func getStockDrawdown(ctx context.Context, cfg BacktestConfig, symbol string, st
 		return 0
 	}
 
-	peakF, err := prices[0].Adjclose.Float64Value()
+	peakF, err := prices[0].Close.Float64Value()
 	if err != nil {
 		log.Printf("Invalid peak value for %s: %v", symbol, err)
 		return 0
@@ -254,7 +260,7 @@ func getStockDrawdown(ctx context.Context, cfg BacktestConfig, symbol string, st
 	peak := peakF.Float64
 	maxDD := 0.0
 	for _, p := range prices {
-		closeF, err := p.Adjclose.Float64Value()
+		closeF, err := p.Close.Float64Value()
 		if err != nil {
 			log.Printf("Invalid price for %s: %v", symbol, err)
 			continue

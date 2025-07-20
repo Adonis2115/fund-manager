@@ -18,40 +18,37 @@ type BulkCreateDailyParams struct {
 	High      pgtype.Numeric
 	Low       pgtype.Numeric
 	Close     pgtype.Numeric
-	Adjclose  pgtype.Numeric
 	Volume    pgtype.Int4
-	Timestamp pgtype.Timestamp
+	Timestamp pgtype.Date
 }
 
 type BulkCreateStocksParams struct {
-	ID           pgtype.UUID
-	Name         string
-	Symbol       string
-	Customsymbol string
-	Scripttype   string
-	Industry     pgtype.Text
-	Isin         pgtype.Text
-	Fno          bool
+	ID         pgtype.UUID
+	Name       string
+	Symbol     string
+	Scripttype string
+	Industry   pgtype.Text
+	Isin       pgtype.Text
+	Fno        bool
 }
 
 const createStock = `-- name: CreateStock :one
 INSERT INTO stocks (
-    id, name, symbol, customSymbol, scriptType, industry, isin, fno
+    id, name, symbol, scriptType, industry, isin, fno
 ) VALUES (
-    $1, $2, $3, $4, $5, $6, $7, $8
+    $1, $2, $3, $4, $5, $6, $7
 )
-RETURNING id, created_at, updated_at, name, symbol, customsymbol, scripttype, industry, isin, fno
+RETURNING id, created_at, updated_at, name, symbol, scripttype, industry, isin, fno
 `
 
 type CreateStockParams struct {
-	ID           pgtype.UUID
-	Name         string
-	Symbol       string
-	Customsymbol string
-	Scripttype   string
-	Industry     pgtype.Text
-	Isin         pgtype.Text
-	Fno          bool
+	ID         pgtype.UUID
+	Name       string
+	Symbol     string
+	Scripttype string
+	Industry   pgtype.Text
+	Isin       pgtype.Text
+	Fno        bool
 }
 
 func (q *Queries) CreateStock(ctx context.Context, arg CreateStockParams) (Stock, error) {
@@ -59,7 +56,6 @@ func (q *Queries) CreateStock(ctx context.Context, arg CreateStockParams) (Stock
 		arg.ID,
 		arg.Name,
 		arg.Symbol,
-		arg.Customsymbol,
 		arg.Scripttype,
 		arg.Industry,
 		arg.Isin,
@@ -72,7 +68,6 @@ func (q *Queries) CreateStock(ctx context.Context, arg CreateStockParams) (Stock
 		&i.UpdatedAt,
 		&i.Name,
 		&i.Symbol,
-		&i.Customsymbol,
 		&i.Scripttype,
 		&i.Industry,
 		&i.Isin,
@@ -82,25 +77,25 @@ func (q *Queries) CreateStock(ctx context.Context, arg CreateStockParams) (Stock
 }
 
 const getHistoricalStockPrices = `-- name: GetHistoricalStockPrices :many
-SELECT d.timestamp, d.adjClose
+SELECT d.timestamp, d.close
 FROM daily d
 JOIN stocks s ON d.stockid = s.id
 WHERE s.symbol = $1
   AND d.timestamp >= $2
   AND d.timestamp <= $3
-  AND d.adjClose IS NOT NULL
+  AND d.close IS NOT NULL
 ORDER BY d.timestamp
 `
 
 type GetHistoricalStockPricesParams struct {
 	Symbol      string
-	Timestamp   pgtype.Timestamp
-	Timestamp_2 pgtype.Timestamp
+	Timestamp   pgtype.Date
+	Timestamp_2 pgtype.Date
 }
 
 type GetHistoricalStockPricesRow struct {
-	Timestamp pgtype.Timestamp
-	Adjclose  pgtype.Numeric
+	Timestamp pgtype.Date
+	Close     pgtype.Numeric
 }
 
 func (q *Queries) GetHistoricalStockPrices(ctx context.Context, arg GetHistoricalStockPricesParams) ([]GetHistoricalStockPricesRow, error) {
@@ -112,7 +107,7 @@ func (q *Queries) GetHistoricalStockPrices(ctx context.Context, arg GetHistorica
 	var items []GetHistoricalStockPricesRow
 	for rows.Next() {
 		var i GetHistoricalStockPricesRow
-		if err := rows.Scan(&i.Timestamp, &i.Adjclose); err != nil {
+		if err := rows.Scan(&i.Timestamp, &i.Close); err != nil {
 			return nil, err
 		}
 		items = append(items, i)
@@ -124,29 +119,29 @@ func (q *Queries) GetHistoricalStockPrices(ctx context.Context, arg GetHistorica
 }
 
 const getLatestClosePrice = `-- name: GetLatestClosePrice :one
-SELECT adjClose
+SELECT close
 FROM daily d
 JOIN stocks s ON d.stockid = s.id
 WHERE s.symbol = $1 AND d.timestamp <= $2
-AND d.adjclose IS NOT NULL
+AND d.close IS NOT NULL
 ORDER BY d.timestamp DESC
 LIMIT 1
 `
 
 type GetLatestClosePriceParams struct {
 	Symbol    string
-	Timestamp pgtype.Timestamp
+	Timestamp pgtype.Date
 }
 
 func (q *Queries) GetLatestClosePrice(ctx context.Context, arg GetLatestClosePriceParams) (pgtype.Numeric, error) {
 	row := q.db.QueryRow(ctx, getLatestClosePrice, arg.Symbol, arg.Timestamp)
-	var adjclose pgtype.Numeric
-	err := row.Scan(&adjclose)
-	return adjclose, err
+	var close pgtype.Numeric
+	err := row.Scan(&close)
+	return close, err
 }
 
 const getStock = `-- name: GetStock :one
-SELECT id, created_at, updated_at, name, symbol, customsymbol, scripttype, industry, isin, fno FROM stocks
+SELECT id, created_at, updated_at, name, symbol, scripttype, industry, isin, fno FROM stocks
 WHERE id = $1 LIMIT 1
 `
 
@@ -159,7 +154,6 @@ func (q *Queries) GetStock(ctx context.Context, id pgtype.UUID) (Stock, error) {
 		&i.UpdatedAt,
 		&i.Name,
 		&i.Symbol,
-		&i.Customsymbol,
 		&i.Scripttype,
 		&i.Industry,
 		&i.Isin,
@@ -169,7 +163,7 @@ func (q *Queries) GetStock(ctx context.Context, id pgtype.UUID) (Stock, error) {
 }
 
 const getStocks = `-- name: GetStocks :many
-SELECT id, created_at, updated_at, name, symbol, customsymbol, scripttype, industry, isin, fno FROM stocks
+SELECT id, created_at, updated_at, name, symbol, scripttype, industry, isin, fno FROM stocks
 ORDER BY name
 `
 
@@ -188,7 +182,6 @@ func (q *Queries) GetStocks(ctx context.Context) ([]Stock, error) {
 			&i.UpdatedAt,
 			&i.Name,
 			&i.Symbol,
-			&i.Customsymbol,
 			&i.Scripttype,
 			&i.Industry,
 			&i.Isin,
@@ -208,35 +201,35 @@ const getTopStocksByReturn = `-- name: GetTopStocksByReturn :many
 WITH one_year_ago_prices AS (
     SELECT DISTINCT ON (d.stockid)
         d.stockid,
-        d.adjClose
+        d.close
     FROM
         daily d
     JOIN stocks s ON d.stockid = s.id
     WHERE
         d.timestamp <= ($1::timestamp - make_interval(months => $2::int))
-        AND d.adjClose IS NOT NULL
-        AND d.adjClose != 0
+        AND d.close IS NOT NULL
+        AND d.close != 0
         AND ($3 = 'all' OR s.scriptType = $3)
     ORDER BY d.stockid, d.timestamp DESC
 ),
 latest_prices AS (
     SELECT DISTINCT ON (d.stockid)
         d.stockid,
-        d.adjClose
+        d.close
     FROM
         daily d
     JOIN stocks s ON d.stockid = s.id
     WHERE
         d.timestamp <= $1::timestamp
-        AND d.adjClose IS NOT NULL
-        AND d.adjClose != 0
+        AND d.close IS NOT NULL
+        AND d.close != 0
         AND ($3 = 'all' OR s.scriptType = $3)
     ORDER BY d.stockid, d.timestamp DESC
 ),
 stock_returns AS (
     SELECT
         l.stockid,
-        ROUND((l.adjClose - o.adjClose) / o.adjClose * 100)::int AS return_percentage
+        ROUND((l.close - o.close) / o.close * 100)::int AS return_percentage
     FROM latest_prices l
     JOIN one_year_ago_prices o ON l.stockid = o.stockid
 )
