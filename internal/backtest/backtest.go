@@ -16,7 +16,7 @@ type BacktestConfig struct {
 	StartDate      time.Time
 	EndDate        time.Time
 	TopN           int32
-	ScriptType     string
+	ScriptType     []string
 	InitialCapital float64
 	Service        *services.Service
 }

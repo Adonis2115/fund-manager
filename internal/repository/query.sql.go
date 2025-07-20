@@ -209,7 +209,7 @@ WITH one_year_ago_prices AS (
         d.timestamp <= ($1::timestamp - make_interval(months => $2::int))
         AND d.close IS NOT NULL
         AND d.close != 0
-        AND ($3 = 'all' OR s.scriptType = $3)
+        AND s.scriptType = ANY($3::text[])
     ORDER BY d.stockid, d.timestamp DESC
 ),
 latest_prices AS (
@@ -223,7 +223,7 @@ latest_prices AS (
         d.timestamp <= $1::timestamp
         AND d.close IS NOT NULL
         AND d.close != 0
-        AND ($3 = 'all' OR s.scriptType = $3)
+        AND s.scriptType = ANY($3::text[])
     ORDER BY d.stockid, d.timestamp DESC
 ),
 stock_returns AS (
@@ -247,7 +247,7 @@ LIMIT $4
 type GetTopStocksByReturnParams struct {
 	Column1 pgtype.Timestamp
 	Column2 int32
-	Column3 interface{}
+	Column3 []string
 	Limit   int32
 }
 

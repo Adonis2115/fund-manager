@@ -23,12 +23,11 @@ func main() {
 	defer pool.Close()
 
 	service := services.NewService(queries)
-
 	cfg := backtest.BacktestConfig{
-		StartDate:      time.Date(2025, 2, 19, 0, 0, 0, 0, time.UTC),
+		StartDate:      time.Date(2021, 10, 1, 0, 0, 0, 0, time.UTC),
 		EndDate:        time.Date(2025, 7, 18, 0, 0, 0, 0, time.UTC),
 		TopN:           10,
-		ScriptType:     "all",
+		ScriptType:     []string{"mid", "small", "micro"},
 		InitialCapital: 1000000,
 		Service:        service,
 	}
