@@ -30,7 +30,7 @@ func main() {
 	// inject queries into service
 	svc := services.NewService(queries)
 
-	givenDate := time.Date(2025, 7, 20, 0, 0, 0, 0, time.UTC)
+	givenDate := time.Date(2025, 8, 2, 0, 0, 0, 0, time.UTC)
 	var ts pgtype.Timestamp
 	if err := ts.Scan(givenDate); err != nil {
 		log.Fatalf("Failed to scan timestamp: %v", err)
