@@ -24,8 +24,8 @@ func main() {
 
 	service := services.NewService(queries)
 	cfg := backtest.BacktestConfig{
-		StartDate:      time.Date(2023, 9, 1, 0, 0, 0, 0, time.UTC),
-		EndDate:        time.Date(2025, 7, 31, 0, 0, 0, 0, time.UTC),
+		StartDate:      time.Date(2015, 4, 1, 0, 0, 0, 0, time.UTC),
+		EndDate:        time.Date(2017, 3, 31, 0, 0, 0, 0, time.UTC),
 		TopN:           10,
 		ScriptType:     []string{"mid", "small", "micro"},
 		InitialCapital: 1000000,
